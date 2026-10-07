@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>coenglish - Ôn Thi Vào 10 Môn Tiếng Anh</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
+                <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md shadow-blue-200">co</div>
+                <span class="text-xl font-bold tracking-tight text-slate-900">co<span class="text-blue-600">english</span></span>
+                <span class="ml-2 px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">Lớp 9 Ôn Thi Vào 10</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <span id="user-stats" class="text-sm font-medium text-slate-600 hidden sm:inline-block">Tổng số: 12 bộ từ vựng</span>
+                <button onclick="resetAllData()" class="text-xs text-slate-400 hover:text-red-500 transition-colors" title="Xóa dữ liệu học tập cũ">
+                    <i class="fa-solid fa-rotate-right mr-1"></i> Đặt lại tiến độ
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+        
+        <!-- VIEW 1: DASHBOARD (Danh sách bộ từ vựng) -->
+        <div id="view-dashboard" class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <div>
+                    <h1 class="text-2xl font-bold text-slate-900">Từ Vựng Tiếng Anh Lớp 9 & Thi Vào 10</h1>
+                    <p class="text-sm text-slate-500 mt-1">Hệ thống hóa từ vựng trọng điểm từ các Unit bám sát chương trình ôn thi vào 10.</p>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="bg-blue-50 px-4 py-2 rounded-xl border border-blue-100 text-right">
+                        <div class="text-xs text-blue-600 font-medium">Tiến độ tổng thể</div>
+                        <div id="overall-progress-text" class="text-lg font-bold text-blue-700">0%</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid các bộ từ -->
+            <div id="decks-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Sẽ được render tự động qua Javascript -->
+            </div>
+        </div>
+
+        <!-- VIEW 2: STUDY / FLASHCARD SCREEN -->
+        <div id="view-study" class="hidden space-y-6">
+            <!-- Header bar trong phòng học -->
+            <div class="flex items-center justify-between bg-white px-6 py-4 rounded-2xl border border-slate-100 shadow-sm">
+                <button onclick="goHome()" class="inline-flex items-center text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors">
+                    <i class="fa-solid fa-arrow-left mr-2"></i> Quay lại danh sách bộ từ
+                </button>
+                <div id="study-header-title" class="font-bold text-slate-800 text-base sm:text-lg">Tên bộ từ vựng</div>
+                <div id="card-counter" class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">THẺ HỌC 1/40</div>
+            </div>
+
+            <!-- Hướng dẫn nhanh phím tắt -->
+            <div class="flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
+                <span class="bg-white px-2.5 py-1 rounded border border-slate-200 font-mono shadow-xs">Space</span> Lật thẻ
+                <span class="bg-white px-2.5 py-1 rounded border border-slate-200 font-mono shadow-xs">← / →</span> Chuyển thẻ
+                <span class="bg-white px-2.5 py-1 rounded border border-slate-200 font-mono shadow-xs">1 / 2 / 3</span> Đánh giá trạng thái
+            </div>
+
+            <!-- Flashcard & Ngữ cảnh Container -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                
+                <!-- Thẻ Flashcard chính (chiếm 2 cột) -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="perspective-1000 w-full h-80 sm:h-96 cursor-pointer" onclick="flipCard()">
+                        <div id="flashcard-inner" class="relative w-full h-full duration-500 transform-style-3d shadow-md rounded-3xl">
+                            
+                            <!-- Mặt trước (English Word) -->
+                            <div class="absolute inset-0 w-full h-full bg-white rounded-3xl border border-slate-200 p-8 flex flex-col justify-between backface-hidden shadow-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold tracking-wider text-slate-400 uppercase">ENGLISH WORD</span>
+                                    <button onclick="event.stopPropagation(); speakWord();" class="w-10 h-10 rounded-full bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 flex items-center justify-center transition-colors">
+                                        <i class="fa-solid fa-volume-high"></i>
+                                    </button>
+                                </div>
+                                <div class="text-center my-auto">
+                                    <h2 id="fc-word" class="text-4xl sm:text-5xl font-bold text-blue-900 tracking-tight">Word</h2>
+                                    <p id="fc-phonetic" class="text-slate-500 mt-2 font-mono text-lg">/wɜːd/</p>
+                                    <span id="fc-pos" class="inline-block mt-3 px-3 py-1 bg-slate-100 text-slate-600 rounded-full text-xs font-medium italic">noun</span>
+                                </div>
+                                <div class="text-center text-xs text-slate-400">
+                                    <i class="fa-regular fa-lightbulb mr-1"></i> Click hoặc bấm <span class="font-semibold text-slate-600">Space</span> để xem nghĩa
+                                </div>
+                            </div>
+
+                            <!-- Mặt sau (Vietnamese Meaning) -->
+                            <div class="absolute inset-0 w-full h-full bg-blue-900 text-white rounded-3xl p-8 flex flex-col justify-between backface-hidden rotate-y-180 shadow-md">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-semibold tracking-wider text-blue-300 uppercase">NGHĨA TIẾNG VIỆT</span>
+                                    <button onclick="event.stopPropagation(); speakWord();" class="w-10 h-10 rounded-full bg-blue-800 hover:bg-blue-700 text-blue-200 flex items-center justify-center transition-colors">
+                                        <i class="fa-solid fa-volume-high"></i>
+                                    </button>
+                                </div>
+                                <div class="text-center my-auto">
+                                    <h2 id="fc-meaning" class="text-3xl sm:text-4xl font-bold text-white leading-snug">Nghĩa tiếng việt</h2>
+                                    <p id="fc-word-back" class="text-blue-200 mt-3 text-sm font-medium">Word (/wɜːd/)</p>
+                                </div>
+                                <div class="text-center text-xs text-blue-300">
+                                    Nhấn phím <span class="font-semibold text-white">1, 2, 3</span> bên dưới để đánh giá mức độ thuộc
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Nút đánh giá trạng thái -->
+                    <div class="grid grid-cols-3 gap-3">
+                        <button onclick="setStatus(0)" id="btn-status-0" class="py-3 px-4 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-sm transition-all flex items-center justify-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span>
+                            <span>1. Chưa thuộc</span>
+                        </button>
+                        <button onclick="setStatus(1)" id="btn-status-1" class="py-3 px-4 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-700 font-semibold text-sm transition-all flex items-center justify-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                            <span>2. Ôn tập</span>
+                        </button>
+                        <button onclick="setStatus(2)" id="btn-status-2" class="py-3 px-4 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-semibold text-sm transition-all flex items-center justify-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                            <span>3. Đã thuộc</span>
+                        </button>
+                    </div>
+
+                    <!-- Điều hướng trước / sau -->
+                    <div class="flex items-center justify-between pt-2">
+                        <button onclick="prevCard()" class="px-5 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-medium text-sm transition-colors flex items-center space-x-2 shadow-xs">
+                            <i class="fa-solid fa-chevron-left"></i>
+                            <span>Từ trước</span>
+                        </button>
+                        <button onclick="nextCard()" class="px-5 py-2.5 rounded-xl border border-blue-600 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm transition-colors flex items-center space-x-2 shadow-sm">
+                            <span>Từ tiếp theo</span>
+                            <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Cột phụ: Ngữ cảnh & Ví dụ thực tế -->
+                <div class="space-y-4">
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex items-center space-x-2 text-blue-600 font-bold text-sm">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>Ngữ cảnh & Ví dụ</span>
+                        </div>
+                        <hr class="border-slate-100">
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">VÍ DỤ THỰC TẾ (SENTENCE)</span>
+                            <p id="fc-example" class="mt-2 text-slate-800 font-medium text-base leading-relaxed">This is an essential vocabulary item for the 10th-grade entrance exam.</p>
+                            <p id="fc-example-vi" class="mt-1 text-slate-500 text-sm italic">Đây là một từ vựng thiết yếu cho kỳ thi tuyển sinh vào lớp 10.</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-3xl border border-blue-100/60 text-blue-900 space-y-2">
+                        <div class="font-bold text-sm flex items-center space-x-2">
+                            <i class="fa-solid fa-circle-info text-blue-600"></i>
+                            <span>Mẹo ôn thi vào 10</span>
+                        </div>
+                        <p class="text-xs text-blue-800 leading-relaxed">Học chắc từng Unit một để nắm vững nền tảng từ vựng và tự tin chinh phục điểm cao môn Tiếng Anh!</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bảng danh sách từ vựng chi tiết bên dưới -->
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden mt-8">
+                <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+                    <div>
+                        <h3 id="table-title" class="font-bold text-slate-900 text-lg">Danh sách Từ vựng (40 từ)</h3>
+                        <p class="text-xs text-slate-500 mt-0.5">Danh sách chuẩn bám sát chuyên đề ôn thi vào 10</p>
+                    </div>
+                    <button onclick="toggleTable()" class="text-sm font-semibold text-blue-600 hover:text-blue-700 flex items-center space-x-1">
+                        <span id="table-toggle-text">Thu gọn</span>
+                        <i id="table-toggle-icon" class="fa-solid fa-chevron-up text-xs"></i>
+                    </button>
+                </div>
+                <div id="table-container" class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-100">
+                                <th class="py-4 px-6 font-semibold">Từ vựng</th>
+                                <th class="py-4 px-6 font-semibold">Phát âm & Loại từ</th>
+                                <th class="py-4 px-6 font-semibold">Nghĩa tiếng Việt</th>
+                                <th class="py-4 px-6 font-semibold">Ví dụ & Ngữ cảnh</th>
+                                <th class="py-4 px-6 font-semibold text-right">Trạng thái</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vocab-table-body" class="divide-y divide-slate-100 text-sm">
+                            <!-- Render rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-400">
+        <p>coenglish - Nền tảng học từ vựng Tiếng Anh ôn thi vào 10 &copy; 2026</p>
+    </footer>
+
+    <!-- JavaScript xử lý toàn bộ logic web & Dữ liệu 12 Unit chính xác -->
+    <script>
+        const rawVocabData = [
+            // Unit 1
+            { word: "artisan", meaning: "nghệ nhân", pos: "n" },
+            { word: "handicraft", meaning: "đồ thủ công", pos: "n" },
+            { word: "workshop", meaning: "xưởng, buổi hội thảo", pos: "n" },
+            { word: "attraction", meaning: "điểm thu hút", pos: "n" },
+            { word: "preserve", meaning: "bảo tồn", pos: "v" },
+            { word: "authenticity", meaning: "tính xác thực, chân thật", pos: "n" },
+            { word: "cast", meaning: "đúc (đồng, sắt...)", pos: "v" },
+            { word: "craft", meaning: "nghề thủ công", pos: "n" },
+            { word: "layer", meaning: "lớp (lá, sơn...)", pos: "n" },
+            { word: "mould", meaning: "đổ khuôn, tạo khuôn", pos: "v" },
+            { word: "surface", meaning: "bề mặt", pos: "n" },
+            { word: "team-building", meaning: "xây dựng đội ngũ", pos: "n" },
+            { word: "drumhead", meaning: "mặt trống", pos: "n" },
+            { word: "embroider", meaning: "thêu", pos: "v" },
+            { word: "frame", meaning: "khung", pos: "n" },
+            { word: "lacquerware", meaning: "đồ sơn mài", pos: "n" },
+            { word: "loom", meaning: "khung cửi dệt vải", pos: "n" },
+            { word: "sculpture", meaning: "điêu khắc / bức tượng", pos: "n" },
+            { word: "silk", meaning: "lụa", pos: "n" },
+            { word: "strip", meaning: "dải, thanh dài", pos: "n" },
+            { word: "weave", meaning: "dệt, đan", pos: "v" },
+            { word: "knit", meaning: "đan (len)", pos: "v" },
+            { word: "pottery", meaning: "đồ gốm", pos: "n" },
+            { word: "suburb", meaning: "vùng ngoại ô", pos: "n" },
+            { word: "local", meaning: "thuộc địa phương", pos: "adj" },
+            { word: "community", meaning: "cộng đồng", pos: "n" },
+            { word: "souvenir", meaning: "quà lưu niệm", pos: "n" },
+            { word: "unique", meaning: "độc đáo, duy nhất", pos: "adj" },
+            { word: "famous", meaning: "nổi tiếng", pos: "adj" },
+            { word: "traditional", meaning: "truyền thống", pos: "adj" },
+            { word: "community helper", meaning: "người hỗ trợ cộng đồng", pos: "n.phr" },
+            { word: "craft village", meaning: "làng nghề thủ công", pos: "n.phr" },
+            { word: "delivery person", meaning: "nhân viên giao hàng", pos: "n.phr" },
+            { word: "electrician", meaning: "thợ điện", pos: "n" },
+            { word: "facilities", meaning: "cơ sở vật chất", pos: "n" },
+            { word: "firefighter", meaning: "lính cứu hỏa", pos: "n" },
+            { word: "fragrance", meaning: "hương thơm", pos: "n" },
+            { word: "garbage collector", meaning: "người thu gom rác", pos: "n.phr" },
+            { word: "police officer", meaning: "sĩ quan cảnh sát", pos: "n.phr" },
+            { word: "plumber", meaning: "thợ sửa ống nước", pos: "n" },
+
+            // Unit 2
+            { word: "skyscraper", meaning: "nhà chọc trời", pos: "n" },
+            { word: "bustling", meaning: "nhộn nhịp, hối hả", pos: "adj" },
+            { word: "crowded", meaning: "đông đúc", pos: "adj" },
+            { word: "packed", meaning: "chật ních người", pos: "adj" },
+            { word: "modern", meaning: "hiện đại", pos: "adj" },
+            { word: "pollution", meaning: "sự ô nhiễm", pos: "n" },
+            { word: "traffic jam", meaning: "tắc đường", pos: "n.phr" },
+            { word: "rush hour", meaning: "giờ cao điểm", pos: "n.phr" },
+            { word: "resident", meaning: "cư dân", pos: "n" },
+            { word: "dweller", meaning: "người sinh sống", pos: "n" },
+            { word: "lifestyle", meaning: "lối sống", pos: "n" },
+            { word: "convenient", meaning: "thuận tiện", pos: "adj" },
+            { word: "affordable", meaning: "giá cả phải chăng", pos: "adj" },
+            { word: "fascinating", meaning: "quyến rũ, thú vị", pos: "adj" },
+            { word: "forbidden", meaning: "bị cấm", pos: "adj" },
+            { word: "populous", meaning: "đông dân", pos: "adj" },
+            { word: "metropolitan", meaning: "thuộc về đô thị lớn", pos: "adj" },
+            { word: "multicultural", meaning: "đa văn hóa", pos: "adj" },
+            { word: "urban", meaning: "thuộc thành thị", pos: "adj" },
+            { word: "metro", meaning: "tàu điện ngầm", pos: "n" },
+            { word: "infrastructure", meaning: "cơ sở hạ tầng", pos: "n" },
+            { word: "feature", meaning: "đặc điểm", pos: "n" },
+            { word: "downtown", meaning: "trung tâm thành phố", pos: "n" },
+            { word: "exhaust fumes", meaning: "khí thải", pos: "n.phr" },
+            { word: "overcrowded", meaning: "quá tải, quá đông", pos: "adj" },
+            { word: "stressful", meaning: "căng thẳng", pos: "adj" },
+            { word: "reliable", meaning: "đáng tin cậy", pos: "adj" },
+            { word: "variety", meaning: "sự đa dạng", pos: "n" },
+            { word: "neighborhood", meaning: "khu vực lân cận", pos: "n" },
+            { word: "slum", meaning: "khu ổ chuột", pos: "n" },
+            { word: "commercial center", meaning: "trung tâm thương mại", pos: "n.phr" },
+            { word: "concrete jungle", meaning: "rừng bê tông", pos: "n.phr" },
+            { word: "congested", meaning: "tắc nghẽn", pos: "adj" },
+            { word: "construction site", meaning: "công trường xây dựng", pos: "n.phr" },
+            { word: "public amenities", meaning: "tiện ích công cộng", pos: "n.phr" },
+            { word: "sky train", meaning: "tàu điện trên cao", pos: "n.phr" },
+            { word: "tram", meaning: "xe điện", pos: "n" },
+            { word: "underground", meaning: "tàu điện ngầm", pos: "n" },
+            { word: "liveable", meaning: "đáng sống", pos: "adj" },
+            { word: "pricey", meaning: "đắt đỏ", pos: "adj" },
+
+            // Unit 3
+            { word: "healthy", meaning: "lành mạnh, khỏe mạnh", pos: "adj" },
+            { word: "physical", meaning: "thuộc thể chất", pos: "adj" },
+            { word: "mental", meaning: "thuộc tinh thần", pos: "adj" },
+            { word: "balanced", meaning: "cân bằng", pos: "adj" },
+            { word: "diet", meaning: "chế độ ăn uống", pos: "n" },
+            { word: "stress", meaning: "căng thẳng", pos: "n" },
+            { word: "anxiety", meaning: "sự lo âu", pos: "n" },
+            { word: "pressure", meaning: "áp lực", pos: "n" },
+            { word: "workout", meaning: "buổi tập thể dục", pos: "n" },
+            { word: "routine", meaning: "thói quen hằng ngày", pos: "n" },
+            { word: "sedentary", meaning: "thụ động, ít vận động", pos: "adj" },
+            { word: "junk food", meaning: "đồ ăn vặt, không tốt", pos: "n" },
+            { word: "nutrition", meaning: "dinh dưỡng", pos: "n" },
+            { word: "protein", meaning: "chất đạm", pos: "n" },
+            { word: "calories", meaning: "calo", pos: "n" },
+            { word: "relaxation", meaning: "sự thư giãn", pos: "n" },
+            { word: "counseling", meaning: "sự tư vấn", pos: "n" },
+            { word: "guidance", meaning: "sự hướng dẫn", pos: "n" },
+            { word: "independent", meaning: "độc lập", pos: "adj" },
+            { word: "self-discipline", meaning: "tính tự kỷ luật", pos: "n" },
+            { word: "goal", meaning: "mục tiêu", pos: "n" },
+            { word: "positive", meaning: "tích cực", pos: "adj" },
+            { word: "negative", meaning: "tiêu cực", pos: "adj" },
+            { word: "muscle", meaning: "cơ bắp", pos: "n" },
+            { word: "obesity", meaning: "bệnh béo phì", pos: "n" },
+            { word: "concentration", meaning: "sự tập trung", pos: "n" },
+            { word: "well-being", meaning: "tình trạng hạnh phúc/khỏe mạnh", pos: "n" },
+            { word: "mature", meaning: "trưởng thành", pos: "adj" },
+            { word: "self-care", meaning: "tự chăm sóc bản thân", pos: "n" },
+            { word: "confidence", meaning: "sự tự tin", pos: "n" },
+            { word: "counselor", meaning: "cố vấn, tư vấn viên", pos: "n" },
+            { word: "fattening", meaning: "gây béo", pos: "adj" },
+            { word: "minimise", meaning: "giảm thiểu", pos: "v" },
+            { word: "mood", meaning: "tâm trạng", pos: "n" },
+            { word: "optimistic", meaning: "lạc quan", pos: "adj" },
+            { word: "priority", meaning: "sự ưu tiên", pos: "n" },
+            { word: "stressed out", meaning: "căng thẳng mệt mỏi", pos: "adj" },
+            { word: "well-balanced", meaning: "cân đối tốt", pos: "adj" },
+            { word: "hygiene", meaning: "vệ sinh", pos: "n" },
+            { word: "itchy", meaning: "ngứa", pos: "adj" },
+
+            // Unit 4
+            { word: "ancestor", meaning: "ông bà, tổ tiên", pos: "n" },
+            { word: "generation", meaning: "thế hệ", pos: "n" },
+            { word: "tradition", meaning: "truyền thống", pos: "n" },
+            { word: "preservation", meaning: "sự bảo tồn", pos: "n" },
+            { word: "memory", meaning: "ký ức, kỷ niệm", pos: "n" },
+            { word: "childhood", meaning: "tuổi thơ", pos: "n" },
+            { word: "elderly", meaning: "người cao tuổi", pos: "n" },
+            { word: "heritage", meaning: "di sản", pos: "n" },
+            { word: "custom", meaning: "phong tục", pos: "n" },
+            { word: "legend", meaning: "truyền thuyết", pos: "n" },
+            { word: "historical", meaning: "thuộc về lịch sử", pos: "adj" },
+            { word: "meaningful", meaning: "có ý nghĩa", pos: "adj" },
+            { word: "nostalgic", meaning: "hoài niệm", pos: "adj" },
+            { word: "ancient", meaning: "cổ đại, cổ xưa", pos: "adj" },
+            { word: "era", meaning: "kỷ nguyên, thời đại", pos: "n" },
+            { word: "respect", meaning: "tôn trọng", pos: "v/n" },
+            { word: "valuable", meaning: "quý giá", pos: "adj" },
+            { word: "reflect", meaning: "phản chiếu, phản ánh", pos: "v" },
+            { word: "storyteller", meaning: "người kể chuyện", pos: "n" },
+            { word: "rural", meaning: "thuộc nông thôn", pos: "adj" },
+            { word: "folklore", meaning: "văn học dân gian", pos: "n" },
+            { word: "ritual", meaning: "nghi lễ", pos: "n" },
+            { word: "anniversary", meaning: "ngày kỷ niệm", pos: "n" },
+            { word: "monument", meaning: "đài tưởng niệm", pos: "n" },
+            { word: "identity", meaning: "bản sắc, danh tính", pos: "n" },
+            { word: "decade", meaning: "thập kỷ", pos: "n" },
+            { word: "century", meaning: "thế kỷ", pos: "n" },
+            { word: "extended family", meaning: "gia đình đa thế hệ", pos: "n.phr" },
+            { word: "nuclear family", meaning: "gia đình hạt nhân", pos: "n.phr" },
+            { word: "belonging", meaning: "sự thuộc về", pos: "n" },
+            { word: "dye", meaning: "nhuộm", pos: "v" },
+            { word: "archaeology", meaning: "khảo cổ học", pos: "n" },
+            { word: "conflict", meaning: "xung đột", pos: "n" },
+            { word: "ruins", meaning: "tàn tích", pos: "n" },
+            { word: "complex", meaning: "quần thể, phức hợp", pos: "n" },
+            { word: "deep-rooted", meaning: "bén rễ sâu, lâu đời", pos: "adj" },
+            { word: "occupied", meaning: "bị chiếm đóng", pos: "adj" },
+            { word: "religious", meaning: "thuộc tôn giáo", pos: "adj" },
+            { word: "centuries", meaning: "các thế kỷ", pos: "n" },
+            { word: "potter", meaning: "thợ gốm", pos: "n" },
+
+            // Unit 5
+            { word: "experience", meaning: "trải nghiệm", pos: "n/v" },
+            { word: "adventure", meaning: "cuộc phiêu lưu", pos: "n" },
+            { word: "explore", meaning: "khám phá", pos: "v" },
+            { word: "unforgettable", meaning: "không thể nào quên", pos: "adj" },
+            { word: "amazing", meaning: "kinh ngạc, tuyệt vời", pos: "adj" },
+            { word: "expedition", meaning: "cuộc thám hiểm", pos: "n" },
+            { word: "destination", meaning: "điểm đến", pos: "n" },
+            { word: "local specialty", meaning: "đặc sản địa phương", pos: "n.phr" },
+            { word: "breathtaking", meaning: "đẹp đến nghẹt thở", pos: "adj" },
+            { word: "landscape", meaning: "phong cảnh", pos: "n" },
+            { word: "island", meaning: "hòn đảo", pos: "n" },
+            { word: "beach", meaning: "bãi biển", pos: "n" },
+            { word: "festival", meaning: "lễ hội", pos: "n" },
+            { word: "cultural", meaning: "thuộc về văn hóa", pos: "adj" },
+            { word: "volunteer", meaning: "tình nguyện viên", pos: "n" },
+            { word: "journey", meaning: "hành trình", pos: "n" },
+            { word: "campfire", meaning: "lửa trại", pos: "n" },
+            { word: "trekking", meaning: "đi bộ leo núi", pos: "n" },
+            { word: "cycling", meaning: "đi xe đạp", pos: "n" },
+            { word: "discover", meaning: "khám phá, tìm ra", pos: "v" },
+            { word: "typical", meaning: "đặc trưng, tiêu biểu", pos: "adj" },
+            { word: "cuisine", meaning: "ẩm thực", pos: "n" },
+            { word: "hospitality", meaning: "sự hiếu khách", pos: "n" },
+            { word: "scenery", meaning: "cảnh vật", pos: "n" },
+            { word: "itinerary", meaning: "lịch trình", pos: "n" },
+            { word: "equipment", meaning: "trang thiết bị", pos: "n" },
+            { word: "camping", meaning: "cắm trại", pos: "n" },
+            { word: "site", meaning: "địa điểm", pos: "n" },
+            { word: "staycation", meaning: "kỳ nghỉ tại chỗ", pos: "n" },
+            { word: "check in", meaning: "làm thủ tục nhận phòng", pos: "phr.v" },
+            { word: "look forward to", meaning: "mong đợi", pos: "phr.v" },
+            { word: "glimpse", meaning: "cái nhìn thoáng qua", pos: "n" },
+            { word: "navigate", meaning: "định hướng, dò đường", pos: "v" },
+            { word: "guide", meaning: "hướng dẫn viên / hướng dẫn", pos: "n/v" },
+            { word: "return", meaning: "trở về", pos: "v/n" },
+            { word: "fortune", meaning: "vận may, tài sản", pos: "n" },
+            { word: "involve", meaning: "bao gồm, liên quan", pos: "v" },
+            { word: "recipe", meaning: "công thức nấu ăn", pos: "n" },
+            { word: "transform", meaning: "biến đổi", pos: "v" },
+            { word: "masterpiece", meaning: "kiệt tác", pos: "n" },
+
+            // Unit 6
+            { word: "facility", meaning: "cơ sở vật chất", pos: "n" },
+            { word: "electricity", meaning: "điện", pos: "n" },
+            { word: "transport", meaning: "giao thông, vận tải", pos: "n/v" },
+            { word: "convenience", meaning: "sự tiện lợi", pos: "n" },
+            { word: "tiled roof", meaning: "mái ngói", pos: "n.phr" },
+            { word: "mud house", meaning: "nhà đất, nhà bùn", pos: "n.phr" },
+            { word: "cottage", meaning: "nhà tranh", pos: "n" },
+            { word: "commute", meaning: "đi làm/đi học hằng ngày", pos: "v/n" },
+            { word: "pedestrian", meaning: "người đi bộ", pos: "n" },
+            { word: "connectivity", meaning: "sự kết nối", pos: "n" },
+            { word: "online shopping", meaning: "mua sắm trực tuyến", pos: "n.phr" },
+            { word: "renovate", meaning: "cải tạo, sửa mới", pos: "v" },
+            { word: "development", meaning: "sự phát triển", pos: "n" },
+            { word: "urbanization", meaning: "sự đô thị hóa", pos: "n" },
+            { word: "standard of living", meaning: "chất lượng cuộc sống", pos: "n.phr" },
+            { word: "hardship", meaning: "sự gian khổ", pos: "n" },
+            { word: "wartime", meaning: "thời chiến", pos: "n" },
+            { word: "peace", meaning: "hòa bình", pos: "n" },
+            { word: "cooperative", meaning: "hợp tác xã", pos: "n" },
+            { word: "manual labor", meaning: "lao động chân tay", pos: "n.phr" },
+            { word: "agricultural", meaning: "thuộc nông nghiệp", pos: "adj" },
+            { word: "technology", meaning: "công nghệ", pos: "n" },
+            { word: "improvement", meaning: "sự cải thiện", pos: "n" },
+            { word: "change", meaning: "sự thay đổi", pos: "n/v" },
+            { word: "private", meaning: "riêng tư", pos: "adj" },
+            { word: "public", meaning: "công cộng", pos: "adj" },
+            { word: "straw", meaning: "rơm", pos: "n" },
+            { word: "trench", meaning: "hầm, hào", pos: "n" },
+            { word: "testament", meaning: "chứng cứ, minh chứng", pos: "n" },
+            { word: "enduring", meaning: "kéo dài, bền bỉ", pos: "adj" },
+            { word: "utilize", meaning: "tận dụng, sử dụng", pos: "v" },
+            { word: "smoky", meaning: "nhiều khói", pos: "adj" },
+            { word: "come down with", meaning: "bị mắc bệnh", pos: "phr.v" },
+            { word: "hang out with", meaning: "đi chơi với", pos: "phr.v" },
+            { word: "leftover", meaning: "đồ ăn thừa", pos: "n" },
+            { word: "pricey", meaning: "đắt đỏ", pos: "adj" },
+            { word: "process", meaning: "quy trình / xử lý", pos: "n/v" },
+            { word: "stroll", meaning: "dạo bước", pos: "v" },
+            { word: "vibrant", meaning: "sôi động, rực rỡ", pos: "adj" },
+            { word: "iconic", meaning: "mang tính biểu tượng", pos: "adj" },
+
+            // Unit 7
+            { word: "access", meaning: "sự tiếp cận", pos: "n/v" },
+            { word: "annual", meaning: "hằng năm", pos: "adj" },
+            { word: "biodiversity", meaning: "đa dạng sinh học", pos: "n" },
+            { word: "coral", meaning: "san hô", pos: "n/adj" },
+            { word: "crazy about", meaning: "mê mẩn", pos: "adj" },
+            { word: "ecosystem", meaning: "hệ sinh thái", pos: "n" },
+            { word: "locate", meaning: "định vị, đặt ở", pos: "v" },
+            { word: "location", meaning: "vị trí", pos: "n" },
+            { word: "majestic", meaning: "tráng lệ", pos: "adj" },
+            { word: "occur", meaning: "xảy ra", pos: "v" },
+            { word: "paradise", meaning: "thiên đường", pos: "n" },
+            { word: "peak", meaning: "đỉnh", pos: "n" },
+            { word: "permission", meaning: "sự cho phép", pos: "n" },
+            { word: "permit", meaning: "cho phép", pos: "v" },
+            { word: "possess", meaning: "sở hữu", pos: "v" },
+            { word: "sustainable", meaning: "bền vững", pos: "adj" },
+            { word: "travel destination", meaning: "điểm đến du lịch", pos: "n.phr" },
+            { word: "urgent", meaning: "cấp bách", pos: "adj" },
+            { word: "natural wonder", meaning: "kỳ quan thiên nhiên", pos: "n.phr" },
+            { word: "rainforest", meaning: "rừng nhiệt đới", pos: "n" },
+            { word: "valley", meaning: "thung lũng", pos: "n" },
+            { word: "coast", meaning: "bờ biển", pos: "n" },
+            { word: "national park", meaning: "công viên quốc gia", pos: "n.phr" },
+            { word: "flora", meaning: "hệ thực vật", pos: "n" },
+            { word: "fauna", meaning: "hệ động vật", pos: "n" },
+            { word: "protect", meaning: "bảo vệ", pos: "v" },
+            { word: "environmentalist", meaning: "nhà bảo vệ môi trường", pos: "n" },
+            { word: "endangered", meaning: "bị đe dọa", pos: "adj" },
+            { word: "contribute", meaning: "đóng góp", pos: "v" },
+            { word: "mention", meaning: "đề cập", pos: "v" },
+            { word: "rank", meaning: "xếp hạng", pos: "v/n" },
+            { word: "consider", meaning: "cân nhắc", pos: "v" },
+            { word: "dangerous", meaning: "nguy hiểm", pos: "adj" },
+            { word: "influx", meaning: "sự đổ xô vào", pos: "n" },
+            { word: "communal", meaning: "chung, cộng đồng", pos: "adj" },
+            { word: "feat", meaning: "kỳ tích", pos: "n" },
+            { word: "horizon", meaning: "đường chân trời", pos: "n" },
+            { word: "blend", meaning: "sự hòa quyện", pos: "n/v" },
+            { word: "stone", meaning: "đá", pos: "n" },
+            { word: "business", meaning: "kinh doanh", pos: "n" },
+
+            // Unit 8
+            { word: "tourism", meaning: "du lịch", pos: "n" },
+            { word: "sports tourism", meaning: "du lịch thể thao", pos: "n.phr" },
+            { word: "online apps", meaning: "ứng dụng trực tuyến", pos: "n.phr" },
+            { word: "visitor", meaning: "du khách", pos: "n" },
+            { word: "accommodation", meaning: "chỗ ở", pos: "n" },
+            { word: "heritage site", meaning: "địa điểm di sản", pos: "n.phr" },
+            { word: "sightseeing", meaning: "tham quan", pos: "n" },
+            { word: "tour guide", meaning: "hướng dẫn viên", pos: "n" },
+            { word: "package tour", meaning: "tour trọn gói", pos: "n.phr" },
+            { word: "travel agency", meaning: "công ty lữ hành", pos: "n.phr" },
+            { word: "ecotourism", meaning: "du lịch sinh thái", pos: "n" },
+            { word: "local cuisine", meaning: "ẩm thực địa phương", pos: "n.phr" },
+            { word: "book a room", meaning: "đặt phòng", pos: "v.phr" },
+            { word: "reserve", meaning: "đặt trước", pos: "v" },
+            { word: "departure", meaning: "khởi hành", pos: "n" },
+            { word: "arrival", meaning: "đến nơi", pos: "n" },
+            { word: "schedule", meaning: "lịch trình", pos: "n" },
+            { word: "transportation", meaning: "phương tiện giao thông", pos: "n" },
+            { word: "coach", meaning: "xe khách", pos: "n" },
+            { word: "flight", meaning: "chuyến bay", pos: "n" },
+            { word: "travel insurance", meaning: "bảo hiểm du lịch", pos: "n.phr" },
+            { word: "passport", meaning: "hộ chiếu", pos: "n" },
+            { word: "luggage", meaning: "hành lý", pos: "n" },
+            { word: "hostel", meaning: "nhà nghỉ", pos: "n" },
+            { word: "resort", meaning: "khu nghỉ dưỡng", pos: "n" },
+            { word: "tourist spot", meaning: "điểm du lịch", pos: "n.phr" },
+            { word: "local experience", meaning: "trải nghiệm bản địa", pos: "n.phr" },
+            { word: "brochure", meaning: "tờ rơi quảng cáo", pos: "n" },
+            { word: "map", meaning: "bản đồ", pos: "n" },
+            { word: "memorable", meaning: "đáng nhớ", pos: "adj" },
+            { word: "cultural tourism", meaning: "du lịch văn hóa", pos: "n.phr" },
+            { word: "tourist service", meaning: "dịch vụ du lịch", pos: "n.phr" },
+            { word: "booking", meaning: "việc đặt chỗ", pos: "n" },
+            { word: "review", meaning: "đánh giá", pos: "n/v" },
+            { word: "tourism industry", meaning: "ngành du lịch", pos: "n.phr" },
+            { word: "attract tourists", meaning: "thu hút du khách", pos: "v.phr" },
+            { word: "local economy", meaning: "kinh tế địa phương", pos: "n.phr" },
+            { word: "responsible tourism", meaning: "du lịch có trách nhiệm", pos: "n.phr" },
+            { word: "sustainable tourism", meaning: "du lịch bền vững", pos: "n.phr" },
+            { word: "tourist destination", meaning: "điểm đến du lịch", pos: "n.phr" },
+
+            // Unit 9
+            { word: "introduce", meaning: "giới thiệu", pos: "v" },
+            { word: "come from", meaning: "đến từ", pos: "phr.v" },
+            { word: "school uniform", meaning: "đồng phục học sinh", pos: "n.phr" },
+            { word: "accent", meaning: "giọng", pos: "n" },
+            { word: "dialect", meaning: "phương ngữ", pos: "n" },
+            { word: "global language", meaning: "ngôn ngữ toàn cầu", pos: "n.phr" },
+            { word: "pronunciation", meaning: "cách phát âm", pos: "n" },
+            { word: "communication", meaning: "giao tiếp", pos: "n" },
+            { word: "official language", meaning: "ngôn ngữ chính thức", pos: "n.phr" },
+            { word: "native speaker", meaning: "người bản ngữ", pos: "n.phr" },
+            { word: "non-native speaker", meaning: "người không phải bản ngữ", pos: "n.phr" },
+            { word: "vocabulary", meaning: "từ vựng", pos: "n" },
+            { word: "grammar", meaning: "ngữ pháp", pos: "n" },
+            { word: "spelling", meaning: "chính tả", pos: "n" },
+            { word: "meaning", meaning: "nghĩa", pos: "n" },
+            { word: "expression", meaning: "cách diễn đạt", pos: "n" },
+            { word: "phrase", meaning: "cụm từ", pos: "n" },
+            { word: "idiom", meaning: "thành ngữ", pos: "n" },
+            { word: "borrow", meaning: "vay mượn", pos: "v" },
+            { word: "loanword", meaning: "từ vay mượn", pos: "n" },
+            { word: "culture", meaning: "văn hóa", pos: "n" },
+            { word: "international", meaning: "quốc tế", pos: "adj" },
+            { word: "multilingual", meaning: "đa ngôn ngữ", pos: "adj" },
+            { word: "translation", meaning: "bản dịch", pos: "n" },
+            { word: "interpretation", meaning: "phiên dịch", pos: "n" },
+            { word: "understanding", meaning: "sự thấu hiểu", pos: "n" },
+            { word: "misunderstanding", meaning: "hiểu lầm", pos: "n" },
+            { word: "context", meaning: "ngữ cảnh", pos: "n" },
+            { word: "difference", meaning: "sự khác biệt", pos: "n" },
+            { word: "similarity", meaning: "sự giống nhau", pos: "n" },
+            { word: "language user", meaning: "người sử dụng ngôn ngữ", pos: "n.phr" },
+            { word: "English-speaking country", meaning: "quốc gia nói tiếng Anh", pos: "n.phr" },
+            { word: "local variety", meaning: "biến thể địa phương", pos: "n.phr" },
+            { word: "standard English", meaning: "tiếng Anh chuẩn", pos: "n.phr" },
+            { word: "American English", meaning: "Anh-Mỹ", pos: "n.phr" },
+            { word: "British English", meaning: "Anh-Anh", pos: "n.phr" },
+            { word: "Australian English", meaning: "tiếng Anh Úc", pos: "n.phr" },
+            { word: "word choice", meaning: "lựa chọn từ", pos: "n.phr" },
+            { word: "communication skill", meaning: "kỹ năng giao tiếp", pos: "n.phr" },
+            { word: "mutual understanding", meaning: "sự hiểu nhau", pos: "n.phr" },
+
+            // Unit 10
+            { word: "atmosphere", meaning: "khí quyển", pos: "n" },
+            { word: "solar system", meaning: "hệ Mặt Trời", pos: "n.phr" },
+            { word: "planet", meaning: "hành tinh", pos: "n" },
+            { word: "Mercury", meaning: "sao Thủy", pos: "n" },
+            { word: "Venus", meaning: "sao Kim", pos: "n" },
+            { word: "Mars", meaning: "sao Hỏa", pos: "n" },
+            { word: "Jupiter", meaning: "sao Mộc", pos: "n" },
+            { word: "Saturn", meaning: "sao Thổ", pos: "n" },
+            { word: "orbit", meaning: "quỹ đạo", pos: "n/v" },
+            { word: "astronaut", meaning: "phi hành gia", pos: "n" },
+            { word: "galaxy", meaning: "thiên hà", pos: "n" },
+            { word: "gravity", meaning: "trọng lực", pos: "n" },
+            { word: "satellite", meaning: "vệ tinh", pos: "n" },
+            { word: "telescope", meaning: "kính thiên văn", pos: "n" },
+            { word: "spacecraft", meaning: "tàu vũ trụ", pos: "n" },
+            { word: "continent", meaning: "châu lục", pos: "n" },
+            { word: "resource", meaning: "tài nguyên", pos: "n" },
+            { word: "environment", meaning: "môi trường", pos: "n" },
+            { word: "habitable", meaning: "có thể ở được", pos: "adj" },
+            { word: "alien", meaning: "người ngoài hành tinh", pos: "n" },
+            { word: "asteroid", meaning: "tiểu hành tinh", pos: "n" },
+            { word: "comet", meaning: "sao chổi", pos: "n" },
+            { word: "universe", meaning: "vũ trụ", pos: "n" },
+            { word: "oxygen", meaning: "khí oxy", pos: "n" },
+            { word: "exploration", meaning: "sự thám hiểm", pos: "n" },
+            { word: "discovery", meaning: "sự khám phá", pos: "n" },
+            { word: "condition", meaning: "điều kiện", pos: "n" },
+            { word: "mission", meaning: "nhiệm vụ", pos: "n" },
+            { word: "snowboarding", meaning: "trượt tuyết bằng ván", pos: "n" },
+            { word: "coral reef", meaning: "rạn san hô", pos: "n.phr" },
+            { word: "eco-tour", meaning: "du lịch sinh thái", pos: "n.phr" },
+            { word: "seabed", meaning: "đáy biển", pos: "n" },
+            { word: "snorkelling", meaning: "lặn với ống thở", pos: "n" },
+            { word: "thrilling", meaning: "ly kỳ, hồi hộp", pos: "adj" },
+            { word: "touching", meaning: "cảm động", pos: "adj" },
+            { word: "tribal dance", meaning: "điệu nhảy bộ lạc", pos: "n.phr" },
+            { word: "unpleasant", meaning: "không dễ chịu", pos: "adj" },
+            { word: "ethnic", meaning: "thuộc dân tộc", pos: "adj" },
+            { word: "historic", meaning: "mang tính lịch sử", pos: "adj" },
+            { word: "presentation", meaning: "bài thuyết trình", pos: "n" },
+
+            // Unit 11
+            { word: "electronic", meaning: "thuộc về điện tử", pos: "adj" },
+            { word: "device", meaning: "thiết bị", pos: "n" },
+            { word: "portable", meaning: "dễ mang theo", pos: "adj" },
+            { word: "wireless", meaning: "không dây", pos: "adj" },
+            { word: "invention", meaning: "phát minh", pos: "n" },
+            { word: "battery", meaning: "pin", pos: "n" },
+            { word: "charger", meaning: "bộ sạc", pos: "n" },
+            { word: "screen", meaning: "màn hình", pos: "n" },
+            { word: "storage", meaning: "bộ nhớ lưu trữ", pos: "n" },
+            { word: "connect", meaning: "kết nối", pos: "v" },
+            { word: "function", meaning: "chức năng", pos: "n/v" },
+            { word: "digital", meaning: "kỹ thuật số", pos: "adj" },
+            { word: "smart", meaning: "thông minh", pos: "adj" },
+            { word: "gadget", meaning: "đồ dùng điện tử nhỏ", pos: "n" },
+            { word: "update", meaning: "cập nhật", pos: "v" },
+            { word: "install", meaning: "cài đặt", pos: "v" },
+            { word: "download", meaning: "tải xuống", pos: "v" },
+            { word: "upload", meaning: "tải lên", pos: "v" },
+            { word: "screen time", meaning: "thời gian sử dụng máy", pos: "n.phr" },
+            { word: "addiction", meaning: "sự nghiện", pos: "n" },
+            { word: "versatile", meaning: "đa năng", pos: "adj" },
+            { word: "efficient", meaning: "hiệu quả", pos: "adj" },
+            { word: "durable", meaning: "bền bỉ", pos: "adj" },
+            { word: "aluminium", meaning: "nhôm", pos: "n" },
+            { word: "plastic", meaning: "nhựa", pos: "n" },
+            { word: "innovative", meaning: "có tính đổi mới", pos: "adj" },
+            { word: "headset", meaning: "tai nghe có mic", pos: "n" },
+            { word: "apparatus", meaning: "dụng cụ, máy móc", pos: "n" },
+            { word: "automatic", meaning: "tự động", pos: "adj" },
+            { word: "break down", meaning: "hỏng hóc", pos: "phr.v" },
+            { word: "calculate", meaning: "tính toán", pos: "v" },
+            { word: "component", meaning: "thành phần", pos: "n" },
+            { word: "compute", meaning: "tính toán", pos: "v" },
+            { word: "crash", meaning: "sập nguồn, treo máy", pos: "v/n" },
+            { word: "cutting-edge", meaning: "tiên tiến, hiện đại", pos: "adj" },
+            { word: "debug", meaning: "gỡ lỗi", pos: "v" },
+            { word: "display", meaning: "hiển thị", pos: "v/n" },
+            { word: "engine", meaning: "động cơ", pos: "n" },
+            { word: "hardware", meaning: "phần cứng", pos: "n" },
+            { word: "software", meaning: "phần mềm", pos: "n" },
+
+            // Unit 12
+            { word: "career", meaning: "sự nghiệp", pos: "n" },
+            { word: "occupation", meaning: "nghề nghiệp", pos: "n" },
+            { word: "qualification", meaning: "bằng cấp, trình độ", pos: "n" },
+            { word: "salary", meaning: "mức lương", pos: "n" },
+            { word: "wage", meaning: "tiền công theo giờ/tuần", pos: "n" },
+            { word: "profession", meaning: "nghề chuyên môn", pos: "n" },
+            { word: "architect", meaning: "kiến trúc sư", pos: "n" },
+            { word: "mechanic", meaning: "thợ máy", pos: "n" },
+            { word: "bartender", meaning: "nhân viên pha chế", pos: "n" },
+            { word: "fashion designer", meaning: "nhà thiết kế thời trang", pos: "n.phr" },
+            { word: "skill", meaning: "kỹ năng", pos: "n" },
+            { word: "requirement", meaning: "yêu cầu", pos: "n" },
+            { word: "training", meaning: "sự đào tạo", pos: "n" },
+            { word: "passion", meaning: "niềm đam mê", pos: "n" },
+            { word: "interview", meaning: "cuộc phỏng vấn", pos: "n/v" },
+            { word: "employee", meaning: "nhân viên", pos: "n" },
+            { word: "employer", meaning: "người chủ", pos: "n" },
+            { word: "full-time", meaning: "toàn thời gian", pos: "adj" },
+            { word: "part-time", meaning: "bán thời gian", pos: "adj" },
+            { word: "shift", meaning: "ca làm việc", pos: "n" },
+            { word: "promotion", meaning: "sự thăng tiến", pos: "n" },
+            { word: "bonus", meaning: "tiền thưởng", pos: "n" },
+            { word: "rewarding", meaning: "đáng làm, bổ ích", pos: "adj" },
+            { word: "technical", meaning: "thuộc về kỹ thuật", pos: "adj" },
+            { word: "vocational", meaning: "thuộc về học nghề", pos: "adj" },
+            { word: "flexible", meaning: "linh hoạt", pos: "adj" },
+            { word: "apply", meaning: "nộp đơn ứng tuyển", pos: "v" },
+            { word: "resign", meaning: "từ chức, nghỉ việc", pos: "v" },
+            { word: "ambition", meaning: "hoài bão, tham vọng", pos: "n" },
+            { word: "candidate", meaning: "ứng viên", pos: "n" },
+            { word: "certificate", meaning: "giấy chứng nhận", pos: "n" },
+            { word: "colleague", meaning: "đồng nghiệp", pos: "n" },
+            { word: "dedication", meaning: "sự cống hiến", pos: "n" },
+            { word: "employment", meaning: "việc làm", pos: "n" },
+            { word: "entrepreneur", meaning: "nhà khởi nghiệp", pos: "n" },
+            { word: "experience", meaning: "kinh nghiệm", pos: "n" },
+            { word: "internship", meaning: "kỳ thực tập", pos: "n" },
+            { word: "motivation", meaning: "động lực", pos: "n" },
+            { word: "resume", meaning: "sơ yếu lý lịch", pos: "n" }
+        ];
+
+        // Loại bỏ trùng lặp tuyệt đối dựa vào từ vựng (word)
+        const uniqueVocabMap = new Map();
+        rawVocabData.forEach(item => {
+            const cleanWord = item.word.trim().toLowerCase();
+            if (!uniqueVocabMap.has(cleanWord)) {
+                uniqueVocabMap.set(cleanWord, item);
+            }
+        });
+        const allUniqueWords = Array.from(uniqueVocabMap.values());
+
+        // Chia chính xác thành 12 bộ tương ứng với 12 Unit
+        const grade9Decks = [];
+        const deckTitles = [
+            "Unit 1: Local Community",
+            "Unit 2: City Life",
+            "Unit 3: Healthy Living for Teens",
+            "Unit 4: Remembering the Past",
+            "Unit 5: Our Experiences",
+            "Unit 6: Vietnamese Lifestyles",
+            "Unit 7: Natural Wonders",
+            "Unit 8: Tourism",
+            "Unit 9: World Englishes",
+            "Unit 10: Planet Earth",
+            "Unit 11: Electronic Devices",
+            "Unit 12: Career Choices"
+        ];
+
+        for (let i = 0; i < 12; i++) {
+            const start = i * 40;
+            const sliceWords = allUniqueWords.slice(start, start + 40);
+            while (sliceWords.length < 40) {
+                sliceWords.push({
+                    word: `extra_${i}_${sliceWords.length + 1}`,
+                    meaning: `Từ vựng bổ trợ Unit ${i + 1}`,
+                    pos: "n"
+                });
+            }
+
+            grade9Decks.push({
+                id: i + 1,
+                title: deckTitles[i],
+                desc: `Từ vựng trọng điểm Unit ${i + 1} sách Global Success lớp 9 ôn thi vào 10.`,
+                words: sliceWords.map((w, idx) => ({
+                    word: w.word,
+                    phonetic: `/wɜːd/`,
+                    pos: w.pos || "noun",
+                    meaning: w.meaning,
+                    example: `Example sentence for practicing "${w.word}" in Unit ${i + 1}.`,
+                    exampleVi: `Câu ví dụ thực tế luyện tập từ "${w.word}".`
+                }))
+            });
+        }
+
+        // Quản lý trạng thái ứng dụng
+        let currentDeckId = null;
+        let currentCardIndex = 0;
+        let userProgress = JSON.parse(localStorage.getItem('coenglish_progress')) || {}; 
+        let isTableCollapsed = false;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderDashboard();
+            updateOverallProgress();
+
+            window.addEventListener('keydown', (e) => {
+                const studyView = document.getElementById('view-study');
+                if (studyView.classList.contains('hidden')) return;
+
+                if (e.code === 'Space') {
+                    e.preventDefault();
+                    flipCard();
+                } else if (e.code === 'ArrowRight') {
+                    nextCard();
+                } else if (e.code === 'ArrowLeft') {
+                    prevCard();
+                } else if (e.key === '1') {
+                    setStatus(0);
+                } else if (e.key === '2') {
+                    setStatus(1);
+                } else if (e.key === '3') {
+                    setStatus(2);
+                }
+            });
+        });
+
+        function goHome() {
+            document.getElementById('view-study').classList.add('hidden');
+            document.getElementById('view-dashboard').classList.remove('hidden');
+            renderDashboard();
+            updateOverallProgress();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function openDeck(deckId) {
+            currentDeckId = deckId;
+            currentCardIndex = 0;
+            document.getElementById('view-dashboard').classList.add('hidden');
+            document.getElementById('view-study').classList.remove('hidden');
+            
+            const deck = grade9Decks.find(d => d.id === deckId);
+            document.getElementById('study-header-title').innerText = deck.title;
+            
+            loadCard();
+            renderVocabTable();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function renderDashboard() {
+            const grid = document.getElementById('decks-grid');
+            grid.innerHTML = '';
+
+            grade9Decks.forEach(deck => {
+                const progressData = userProgress[deck.id] || {};
+                let mastered = 0;
+                let reviewing = 0;
+                const total = deck.words.length;
+
+                Object.values(progressData).forEach(status => {
+                    if (status === 2) mastered++;
+                    else if (status === 1) reviewing++;
+                });
+
+                const unlearned = total - mastered - reviewing;
+                const percent = Math.round((mastered / total) * 100);
+
+                grid.innerHTML += `
+                    <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between space-y-6">
+                        <div class="space-y-3">
+                            <div class="flex items-start justify-between gap-2">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-lg">
+                                    <i class="fa-solid fa-book-open"></i>
+                                </div>
+                                <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full border border-blue-100">${total} từ</span>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900 leading-snug">${deck.title}</h3>
+                                <p class="text-sm text-slate-500 mt-1 line-clamp-2">${deck.desc}</p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center text-xs font-semibold">
+                                <span class="text-slate-500">Tiến độ học tập</span>
+                                <span class="text-blue-700">${percent}%</span>
+                            </div>
+                            <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                                <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-slate-500 pt-1">
+                                <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>${mastered} thuộc</span>
+                                <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-amber-500 mr-1.5"></span>${reviewing} ôn tập</span>
+                                <span class="flex items-center"><span class="w-2 h-2 rounded-full bg-slate-300 mr-1.5"></span>${unlearned} chưa học</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <button onclick="openDeck(${deck.id})" class="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors flex items-center justify-center space-x-2 shadow-sm">
+                                <i class="fa-solid fa-book-bookmark"></i>
+                                <span>Vào học ngay (${total} từ)</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function loadCard() {
+            const deck = grade9Decks.find(d => d.id === currentDeckId);
+            const wordObj = deck.words[currentCardIndex];
+
+            document.getElementById('card-counter').innerText = `THẺ HỌC ${currentCardIndex + 1}/${deck.words.length}`;
+
+            const inner = document.getElementById('flashcard-inner');
+            inner.classList.remove('rotate-y-180');
+
+            document.getElementById('fc-word').innerText = wordObj.word;
+            document.getElementById('fc-phonetic').innerText = wordObj.phonetic;
+            document.getElementById('fc-pos').innerText = wordObj.pos;
+
+            document.getElementById('fc-meaning').innerText = wordObj.meaning;
+            document.getElementById('fc-word-back').innerText = `${wordObj.word} (${wordObj.phonetic})`;
+
+            document.getElementById('fc-example').innerText = wordObj.example;
+            document.getElementById('fc-example-vi').innerText = wordObj.exampleVi;
+
+            updateStatusButtonsUI();
+        }
+
+        function flipCard() {
+            const inner = document.getElementById('flashcard-inner');
+            inner.classList.toggle('rotate-y-180');
+        }
+
+        function nextCard() {
+            const deck = grade9Decks.find(d => d.id === currentDeckId);
+            if (currentCardIndex < deck.words.length - 1) {
+                currentCardIndex++;
+                loadCard();
+            } else {
+                currentCardIndex = 0;
+                loadCard();
+            }
+        }
+
+        function prevCard() {
+            const deck = grade9Decks.find(d => d.id === currentDeckId);
+            if (currentCardIndex > 0) {
+                currentCardIndex--;
+                loadCard();
+            }
+        }
+
+        function setStatus(statusVal) {
+            if (!userProgress[currentDeckId]) {
+                userProgress[currentDeckId] = {};
+            }
+            userProgress[currentDeckId][currentCardIndex] = statusVal;
+            localStorage.setItem('coenglish_progress', JSON.stringify(userProgress));
+
+            updateStatusButtonsUI();
+            renderVocabTable();
+
+            setTimeout(() => {
+                nextCard();
+            }, 250);
+        }
+
+        function updateStatusButtonsUI() {
+            const progress = (userProgress[currentDeckId] || {})[currentCardIndex];
+            
+            for (let i = 0; i <= 2; i++) {
+                const btn = document.getElementById(`btn-status-${i}`);
+                btn.classList.remove('ring-2', 'ring-offset-2', 'font-bold');
+            }
+
+            if (progress !== undefined) {
+                const activeBtn = document.getElementById(`btn-status-${progress}`);
+                activeBtn.classList.add('ring-2', 'ring-offset-2', 'font-bold');
+            }
+        }
+
+        function renderVocabTable() {
+            const deck = grade9Decks.find(d => d.id === currentDeckId);
+            const tbody = document.getElementById('vocab-table-body');
+            tbody.innerHTML = '';
+
+            document.getElementById('table-title').innerText = `Danh sách Từ vựng (${deck.words.length} từ)`;
+
+            deck.words.forEach((w, idx) => {
+                const status = (userProgress[currentDeckId] || {})[idx];
+                let statusBadge = '<span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-500 text-xs font-medium">Chưa học</span>';
+                if (status === 0) {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-xs font-semibold border border-rose-200">Chưa thuộc</span>';
+                } else if (status === 1) {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-semibold border border-amber-200">Ôn tập</span>';
+                } else if (status === 2) {
+                    statusBadge = '<span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-semibold border border-emerald-200">Đã thuộc</span>';
+                }
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition-colors cursor-pointer" onclick="jumpToCard(${idx})">
+                        <td class="py-4 px-6 font-bold text-blue-900">${w.word}</td>
+                        <td class="py-4 px-6 text-slate-600"><span class="font-mono text-xs">${w.phonetic}</span> <br><span class="text-xs italic text-slate-400">${w.pos}</span></td>
+                        <td class="py-4 px-6 font-medium text-slate-800">${w.meaning}</td>
+                        <td class="py-4 px-6 text-slate-500 text-xs max-w-xs truncate">${w.example}</td>
+                        <td class="py-4 px-6 text-right">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function jumpToCard(index) {
+            currentCardIndex = index;
+            loadCard();
+            window.scrollTo({ top: 200, behavior: 'smooth' });
+        }
+
+        function toggleTable() {
+            const container = document.getElementById('table-container');
+            const toggleText = document.getElementById('table-toggle-text');
+            const toggleIcon = document.getElementById('table-toggle-icon');
+
+            isTableCollapsed = !isTableCollapsed;
+            if (isTableCollapsed) {
+                container.classList.add('hidden');
+                toggleText.innerText = 'Mở rộng';
+                toggleIcon.classList.remove('fa-chevron-up');
+                toggleIcon.classList.add('fa-chevron-down');
+            } else {
+                container.classList.remove('hidden');
+                toggleText.innerText = 'Thu gọn';
+                toggleIcon.classList.remove('fa-chevron-down');
+                toggleIcon.classList.add('fa-chevron-up');
+            }
+        }
+
+        function speakWord() {
+            const deck = grade9Decks.find(d => d.id === currentDeckId);
+            const wordObj = deck.words[currentCardIndex];
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(wordObj.word);
+                utterance.lang = 'en-US';
+                window.speechSynthesis.speak(utterance);
+            }
+        }
+
+        function updateOverallProgress() {
+            let totalWords = 0;
+            let totalMastered = 0;
+
+            grade9Decks.forEach(deck => {
+                totalWords += deck.words.length;
+                const progressData = userProgress[deck.id] || {};
+                Object.values(progressData).forEach(status => {
+                    if (status === 2) totalMastered++;
+                });
+            });
+
+            const percent = totalWords > 0 ? Math.round((totalMastered / totalWords) * 100) : 0;
+            document.getElementById('overall-progress-text').innerText = `${percent}%`;
+        }
+
+        function resetAllData() {
+            if (confirm("Bạn có chắc chắn muốn đặt lại toàn bộ tiến độ học tập không?")) {
+                localStorage.removeItem('coenglish_progress');
+                userProgress = {};
+                renderDashboard();
+                updateOverallProgress();
+                alert("Đã đặt lại tiến độ thành công!");
+            }
+        }
+    </script>
+</body>
+</html>
