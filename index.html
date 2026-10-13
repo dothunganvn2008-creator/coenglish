@@ -14,19 +14,34 @@
         .transform-style-3d { transform-style: preserve-3d; }
         .backface-hidden { backface-visibility: hidden; }
         .rotate-y-180 { transform: rotateY(180deg); }
+        .nav-tab { color: #475569; white-space: nowrap; }
+        .nav-tab:hover { background: #eff6ff; color: #1d4ed8; }
+        .nav-tab.active { background: #2563eb; color: #fff; box-shadow: 0 4px 10px rgba(37,99,235,.25); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
 
     <!-- Navbar -->
     <header class="bg-white border-b border-slate-200 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-3 cursor-pointer" onclick="goHome()">
+        <div class="max-w-7xl mx-auto px-4 min-h-16 py-2 flex flex-wrap items-center justify-between gap-y-2">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="switchSection('vocab'); goHome();">
                 <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md shadow-blue-200">co</div>
                 <span class="text-xl font-bold tracking-tight text-slate-900">co<span class="text-blue-600">english</span></span>
-                <span class="ml-2 px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">Lớp 9 Ôn Thi Vào 10</span>
+                <span class="ml-2 hidden lg:inline-block px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-200">Lớp 9 Ôn Thi Vào 10</span>
             </div>
-            <div class="flex items-center space-x-4">
+            <!-- Menu chính -->
+            <nav class="order-last md:order-none w-full md:w-auto flex items-center gap-1 overflow-x-auto" aria-label="Menu chính">
+                <button type="button" data-nav="vocab" onclick="switchSection('vocab')" class="nav-tab inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                    <i class="fa-solid fa-language"></i> Từ vựng
+                </button>
+                <button type="button" data-nav="practice" onclick="switchSection('practice')" class="nav-tab inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                    <i class="fa-solid fa-pen-to-square"></i> Luyện tập
+                </button>
+                <button type="button" data-nav="exam" onclick="switchSection('exam')" class="nav-tab inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-600">
+                    <i class="fa-solid fa-file-lines"></i> Thi thử
+                </button>
+            </nav>
+            <div id="vocab-header-tools" class="flex items-center space-x-4">
                 <span id="user-stats" class="text-sm font-medium text-slate-600 hidden sm:inline-block">Tổng số: 0 bộ từ vựng</span>
                 <button onclick="resetAllData()" class="text-xs text-slate-400 hover:text-red-500 transition-colors" title="Xóa dữ liệu học tập cũ">
                     <i class="fa-solid fa-rotate-right mr-1"></i> Đặt lại tiến độ
@@ -37,6 +52,9 @@
 
     <!-- Main Container -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
+
+        <!-- ===== MỤC 1: TỪ VỰNG ===== -->
+        <div id="section-vocab">
         
         <!-- VIEW 1: DASHBOARD (Danh sách bộ từ vựng) -->
         <div id="view-dashboard" class="space-y-6">
@@ -210,6 +228,71 @@
 
         </div>
 
+        </div>
+
+        <!-- ===== MỤC 2: LUYỆN TẬP ===== -->
+        <section id="section-practice" class="hidden space-y-6">
+          <div id="practice-home" class="space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <h1 class="text-2xl font-bold text-slate-900">Luyện tập</h1>
+                <p class="text-sm text-slate-500 mt-1">Làm bài theo từng dạng để nâng cao kỹ năng cho kỳ thi vào 10.</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+                    <div class="flex items-start justify-between">
+                        <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg"><i class="fa-solid fa-comments"></i></div>
+                        <span class="px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-100">20 câu</span>
+                    </div>
+                    <h3 class="mt-4 font-bold text-slate-900 text-lg">Câu hỏi tình huống giao tiếp</h3>
+                    <p class="text-sm text-slate-500 mt-1">Trắc nghiệm chọn câu đáp phù hợp, chia 3 mức: dễ, vừa, khó.</p>
+                    <p id="quiz-best-comm" class="text-xs text-slate-400 mt-3">Chưa làm bài</p>
+                    <button type="button" onclick="openQuiz('comm')" class="mt-4 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors">Làm bài</button>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col">
+                    <div class="flex items-start justify-between">
+                        <div class="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center text-lg"><i class="fa-solid fa-spell-check"></i></div>
+                        <span class="px-3 py-1 text-xs font-semibold bg-blue-50 text-blue-700 rounded-full border border-blue-100">30 câu</span>
+                    </div>
+                    <h3 class="mt-4 font-bold text-slate-900 text-lg">Động từ khuyết thiếu trong câu điều kiện loại 1</h3>
+                    <p class="text-sm text-slate-500 mt-1">Chọn đáp án điền vào chỗ trống, chia 3 mức: dễ, vừa, khó.</p>
+                    <p id="quiz-best-modal" class="text-xs text-slate-400 mt-3">Chưa làm bài</p>
+                    <button type="button" onclick="openQuiz('modal')" class="mt-4 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm transition-colors">Làm bài</button>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-volume-high"></i></div>
+                    <h3 class="mt-4 font-bold text-slate-900 text-lg">Ngữ âm</h3>
+                    <p class="text-sm text-slate-500 mt-1">Phát âm và trọng âm.</p>
+                    <span class="inline-block mt-4 px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 rounded-full">Sắp có</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-spell-check"></i></div>
+                    <h3 class="mt-4 font-bold text-slate-900 text-lg">Ngữ pháp</h3>
+                    <p class="text-sm text-slate-500 mt-1">Chia động từ, câu điều kiện, câu bị động...</p>
+                    <span class="inline-block mt-4 px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 rounded-full">Sắp có</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i class="fa-solid fa-book-open-reader"></i></div>
+                    <h3 class="mt-4 font-bold text-slate-900 text-lg">Đọc hiểu</h3>
+                    <p class="text-sm text-slate-500 mt-1">Đọc đoạn văn và điền từ.</p>
+                    <span class="inline-block mt-4 px-3 py-1 text-xs font-semibold bg-slate-100 text-slate-500 rounded-full">Sắp có</span>
+                </div>
+            </div>
+          </div>
+          <div id="practice-quiz" class="hidden space-y-6"></div>
+        </section>
+
+        <!-- ===== MỤC 3: THI THỬ ===== -->
+        <section id="section-exam" class="hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                <h1 class="text-2xl font-bold text-slate-900">Thi thử</h1>
+                <p class="text-sm text-slate-500 mt-1">Làm đề hoàn chỉnh, bấm giờ như thi thật.</p>
+            </div>
+            <div class="bg-white p-10 rounded-2xl border border-dashed border-slate-300 text-center">
+                <div class="mx-auto w-14 h-14 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl"><i class="fa-solid fa-file-lines"></i></div>
+                <h3 class="mt-4 font-bold text-slate-900 text-lg">Chưa có đề thi nào</h3>
+                <p class="text-sm text-slate-500 mt-1">Các đề thi thử sẽ xuất hiện ở đây khi được thêm vào.</p>
+            </div>
+        </section>
     </main>
 
     <!-- Footer -->
@@ -1039,10 +1122,13 @@
             document.getElementById('user-stats').innerText = `Tổng số: ${grade9Decks.length} bộ từ vựng`;
             renderDashboard();
             updateOverallProgress();
+            switchSection(location.hash.replace('#', '') || 'vocab');
+            updateQuizBest();
 
             window.addEventListener('keydown', (e) => {
                 const studyView = document.getElementById('view-study');
                 if (studyView.classList.contains('hidden')) return;
+                if (document.getElementById('section-vocab').classList.contains('hidden')) return;
 
                 if (e.code === 'Space') {
                     e.preventDefault();
@@ -1060,6 +1146,177 @@
                 }
             });
         });
+
+
+        // ===== LUYỆN TẬP: CÂU HỎI TÌNH HUỐNG GIAO TIẾP =====
+                // [câu hỏi, [4 đáp án], vị trí đáp án đúng (0=A), giải thích, (tùy chọn) câu trả lời có chỗ trống]
+        const quizComm = [
+            ["Why don't we go to the cinema tonight?", ["Yes, I do.", "That's a good idea.", "No, thank you.", "You're welcome."], 1, "\"That's a good idea\" dùng để đồng ý với lời đề nghị \"Why don't we...?\""],
+            ["Thank you very much for your help.", ["That's right.", "Never mind.", "It doesn't matter.", "You're welcome."], 3, "\"You're welcome\" là câu đáp lại lời cảm ơn phổ biến nhất."],
+            ["I'm terribly sorry I'm late.", ["Never mind. Come in and take a seat.", "Yes, please.", "You're welcome.", "It's a pleasure."], 0, "\"Never mind\" (Không sao đâu) dùng để nhận lời xin lỗi lịch sự khi ai đó đến muộn."],
+            ["Can I help you carry these heavy bags?", ["No, you can't.", "That's very kind of you. Thank you!", "Yes, I can.", "It doesn't matter."], 1, "\"That's very kind of you\" là cách nhận lời giúp đỡ một cách lịch sự, biết ơn."],
+            ["What a fantastic painting you have made!", ["Oh, no. It's very bad.", "I don't think so.", "Yes, it is fantastic.", "Thank you. I'm glad you like it."], 3, "Nhận một lời khen (compliment) thì cần cảm ơn: \"Thank you...\"."],
+            ["Shall we meet at 8 o'clock at the station?", ["Sounds good. See you then!", "No, I didn't see it.", "Yes, I am 14 years old.", "You are very helpful."], 0, "\"Sounds good\" dùng để đồng ý với một lịch hẹn/thời gian đưa ra."],
+            ["Do you mind if I turn on the television?", ["Yes, I do.", "No, I do.", "No, not at all. Go ahead.", "Yes, please do."], 2, "\"Do you mind...?\" (Bạn có phiền không?). Trả lời \"No, not at all\" nghĩa là \"Không phiền đâu, bạn cứ làm đi\"."],
+            ["Would you like to come to my birthday party this Sunday?", ["but I have to visit my grandparents.", "and I will go there.", "because I am free.", "so I can't make it."], 0, "Cấu trúc \"I'd love to, but...\" dùng để từ chối lời mời một cách khéo léo kèm lý do.", "I'd love to, ______."],
+            ["Excuse me, could you tell me the way to the nearest bookstore?", ["Yes, it's a nice book.", "No, I don't know the way.", "Go straight ahead and turn left at the traffic lights.", "It's about 5 kilometers away from the sky."], 2, "Đây là câu trả lời chỉ đường thực tế và đúng ngữ cảnh nhất."],
+            ["I think protecting the environment is everyone's responsibility.", ["I don't think so. It's only for the government.", "I couldn't agree more. We all need to take action.", "You're welcome.", "That's a pity."], 1, "\"I couldn't agree more\" nghĩa là \"Tôi hoàn toàn đồng ý\"."],
+            ["Can I try this jacket on, please?", ["No, you must buy it first.", "Yes, it's expensive.", "I'm sorry, we are closed.", "Sure. The fitting room is over there."], 3, "Người bán hàng trả lời khách muốn thử đồ: \"Chắc chắn rồi. Phòng thử đồ ở đằng kia\"."],
+            ["Hello, could I speak to Mr. Green, please?", ["He is speaking loudly now.", "No, you cannot call him.", "Hold on a second, please. I'll get him.", "He is calling you back."], 2, "\"Hold on a second\" (Xin chờ một chút) là cụm từ chuẩn khi nói chuyện qua điện thoại."],
+            ["What do you think I should do to improve my English pronunciation?", ["You should buy a new bicycle.", "You should practice listening and repeating after native speakers.", "I am doing my homework now.", "No, I don't like English."], 1, "Đây là lời khuyên học tập phù hợp với câu hỏi xin lời khuyên."],
+            ["I lost my favorite fountain pen yesterday.", ["Congratulations!", "That's wonderful!", "How lucky you are!", "Oh, that's a pity. I hope you find it soon."], 3, "\"That's a pity\" bày tỏ sự chia sẻ, cảm thông khi bạn mình làm mất đồ."],
+            ["Are you free to help me move the heavy piano tomorrow?", ["I wish I could, but my back has been acting up all week.", "Yes, I love playing the piano every afternoon.", "Of course, let's play it right now.", "I am very glad to help you carry it for two hours."], 0, "\"I wish I could, but...\" diễn tả việc rất muốn giúp nhưng không thể vì lý do bất khả kháng (đau lưng)."],
+            ["Excuse me, waitress, there is a fly in my soup.", ["Enjoy your meal, sir!", "It doesn't matter, bugs are nutritious.", "I am terribly sorry, sir. I will replace it immediately.", "Thank you for letting me know the weather."], 2, "Đây là lời xin lỗi chuyên nghiệp và cách xử lý sự cố của nhân viên nhà hàng khi khách phàn nàn."],
+            ["Do you mind if I close the window?", ["Yes, please close it.", "Not at all. Go right ahead.", "Yes, it is cold outside.", "No, I can't see the window."], 1, "Tương tự câu 7, \"Not at all\" (Không phiền chút nào) nghĩa là đồng ý cho đóng cửa sổ."],
+            ["We are completely out of chocolate ice cream. Would you like vanilla instead?", ["Yes, chocolate is my favorite.", "No, vanilla is a kind of fruit.", "I prefer the shop to be closed.", "I suppose vanilla will do, though chocolate was my first choice."], 3, "Đây là cách chấp nhận phương án thay thế một cách lịch sự khi món mình thích đã hết."],
+            ["Did John say he would arrive at 5 or 6 PM?", ["Neither, actually. He mentioned 5:30 sharp.", "Yes, he arrived at 7 PM.", "Both 5 and 6 PM are correct.", "He doesn't know how to tell time."], 0, "\"Neither\" nghĩa là \"không phương án nào\", dùng khi giờ hẹn thực tế là một giờ khác (5:30)."],
+            ["Don't you think the Math exam was extremely difficult?", ["Yes, it was very easy.", "No, I didn't take the test.", "It wasn't a walk in the park, but it was manageable if you studied.", "Mathematics is my favorite color."], 2, "Thành ngữ \"not a walk in the park\" nghĩa là \"không hề dễ dàng\"; câu này nhận xét về độ khó một cách khéo léo."]
+        ];
+
+        const quizModal = [
+            ["If it rains heavily this afternoon, we ________ stay at home instead of going out.", ["should", "must to", "can't", "will to"], 0, "\"should\" đưa ra lời khuyên nên ở nhà. Các phương án khác sai cấu trúc ngữ pháp (must/will không đi trực tiếp với \"to V\")."],
+            ["If you want to improve your English vocabulary, you ________ read books every day.", ["may", "need to", "can't", "will have"], 1, "\"need to + V\" thể hiện sự cần thiết phải làm gì."],
+            ["If you finish your homework early, you ________ go to the park with your friends.", ["must", "can", "should to", "ought"], 1, "\"can\" chỉ khả năng hoặc sự cho phép làm gì khi đã hoàn thành bài tập."],
+            ["If there is a deadline approaching, students ________ manage their time wisely.", ["can", "will", "must", "need"], 2, "\"must\" thể hiện sự bắt buộc, cần kíp phải quản lý thời gian khi hạn chót đến gần."],
+            ["If you feel sick or dizzy, you ________ see the school doctor immediately.", ["shouldn't", "has to", "must", "may not"], 2, "\"must\" nhấn mạnh sự bắt buộc/cần thiết cao độ vì liên quan đến sức khỏe cấp bách."],
+            ["If the weather is beautiful tomorrow, we ________ go for a picnic in the countryside.", ["ought", "may", "should to", "don't have to"], 1, "\"may\" chỉ một khả năng có thể xảy ra trong tương lai nhưng không chắc chắn 100%."],
+            ["If you borrow his camera, you ________ take good care of it.", ["must", "can't", "shouldn't", "may to"], 0, "\"must\" thể hiện nghĩa vụ/trách nhiệm bắt buộc phải giữ gìn đồ của người khác."],
+            ["If the traffic light turns red, all drivers ________ stop their vehicles.", ["should to", "must", "can", "may"], 1, "\"must\" dùng cho luật lệ, quy định bắt buộc (đèn đỏ phải dừng)."],
+            ["If you don't understand the lesson, you ________ ask your teacher for help.", ["shouldn't", "has to", "will to", "ought to"], 3, "\"ought to\" đồng nghĩa với \"should\" (nên làm gì), các từ khác đều sai cấu trúc với \"to help\"."],
+            ["If you have a driver's license, you ________ drive a car on public roads.", ["must to", "shouldn't", "can", "have"], 2, "\"can\" chỉ khả năng được pháp luật cho phép làm gì."],
+            ["If you visit a pagoda or a church, you ________ wear shorts or tank tops.", ["don't have to", "must not", "shouldn't to", "might not"], 1, "\"must not\" mang ý nghĩa cấm đoán (không được phép mặc quần đùi vào nơi tôn nghiêm)."],
+            ["If she wants to pass the upcoming entrance exam, she ________ study much harder.", ["has to", "must to", "shouldn't", "need"], 0, "\"has to\" chỉ sự bắt buộc do yếu tố khách quan tác động (muốn đỗ thì phải học)."],
+            ["If they don't buy the tickets now, they ________ not get good seats for the concert.", ["must", "should", "might", "has to"], 2, "\"might\" chỉ một khả năng có thể xảy ra (có lẽ sẽ không mua được vé tốt)."],
+            ["If you want to lose weight safely, you ________ eat too much fast food.", ["don't need", "shouldn't", "must to", "cannot to"], 1, "\"shouldn't\" đưa ra lời khuyên không nên ăn quá nhiều đồ ăn nhanh để giảm cân."],
+            ["If the internet connection is weak, you ________ not be able to watch this video in HD.", ["may", "should", "must", "ought"], 0, "\"may\" chỉ một khả năng có thể xảy ra do mạng yếu."],
+            ["If you travel abroad, you ________ carry your passport with you at all times.", ["need", "ought to", "can't", "are able"], 1, "\"ought to\" bằng với \"should\", mang tính khuyên bảo hành động đúng đắn khi đi nước ngoài."],
+            ["If he doesn't arrive on time, we ________ start the meeting without him.", ["must to", "has to", "will have to", "should to"], 2, "\"will have to\" diễn tả một sự bắt buộc sẽ phải làm trong tương lai do hoàn cảnh đưa ra."],
+            ["If you want to buy that expensive smartphone, you ________ save your pocket money from now.", ["need to", "can't", "shouldn't", "may to"], 0, "\"need to\" thể hiện sự cần thiết phải tiết kiệm tiền để mua đồ đắt tiền."],
+            ["If the test is optional, you ________ take it if you don't want to.", ["must not", "don't have to", "shouldn't to", "cannot"], 1, "\"don't have to\" mang ý nghĩa \"không cần phải\" (bài kiểm tra tự chọn nên không bắt buộc phải làm)."],
+            ["If we want to reduce plastic pollution, we ________ recycle as many bottles as possible.", ["might", "should", "can't", "must to"], 1, "\"should\" đưa ra lời khuyên mang tính đạo đức/trách nhiệm xã hội về bảo vệ môi trường."],
+            ["If you are under 18 years old, you ________ drive a motorbike over 50cc according to the law.", ["don't have to", "had better not", "are not allowed to", "shouldn't to"], 2, "\"are not allowed to\" mang nghĩa \"không được phép\", phù hợp cấu trúc câu và quy định của luật pháp."],
+            ["If you want to catch the earliest bus to the city, you ________ set your alarm for 5 AM.", ["had better", "would rather", "ought", "must to"], 0, "\"had better\" bằng với \"should\" dùng để đưa ra lời khuyên khuyên răn mạnh mẽ."],
+            ["If the weather conditions worsen, the flight ________ be delayed for safety reasons.", ["shouldn't", "will have", "is bound to", "can to"], 2, "\"is bound to\" dùng để chỉ một sự việc chắc chắn sẽ xảy ra do xu hướng hoặc sắp đặt."],
+            ["If you don't submit the project by Friday, you ________ fail the entire module.", ["are supposed to", "run the risk of", "could", "had better"], 2, "\"could\" ở đây chỉ một khả năng có thể xảy ra ở tương lai (có thể sẽ trượt)."],
+            ["If you suffer from severe back pain, you ________ lift those heavy boxes by yourself.", ["don't need to", "had better not", "are not able", "may not to"], 1, "\"had better not\" đưa ra lời khuyên ngăn mạnh mẽ đối với người đang bị đau lưng."],
+            ["If the store offers a 50% discount today, the items ________ sell out very quickly.", ["are likely to", "must to", "shouldn't", "will can"], 0, "\"are likely to\" mang nghĩa \"có khả năng cao sẽ làm gì\", đúng cấu trúc đi với \"to sell\"."],
+            ["If you want to enter this high-security area, you ________ show your identification card.", ["are required to", "had better to", "should to", "may not"], 0, "\"are required to\" mang nghĩa \"bị bắt buộc/yêu cầu phải làm gì\" theo quy định an ninh."],
+            ["If he doesn't practice speaking English regularly, he ________ pass the oral examination.", ["won't be able to", "shouldn't to", "must not", "doesn't have to"], 0, "\"won't be able to\" diễn tả việc không có khả năng làm gì trong tương lai."],
+            ["If you choose to study abroad, you ________ adapt to a completely new culture.", ["will have to", "ought", "need to to", "are able"], 0, "\"will have to\" chỉ sự bắt buộc sẽ phải đối mặt trong tương lai khi đi du học."],
+            ["If they want to prevent the fire from spreading, they ________ act immediately.", ["are supposed", "had better", "may to", "wouldn't rather"], 1, "\"had better\" là lời khuyên hành động khẩn cấp để ngăn hỏa hoạn lan rộng."]
+        ];
+        const quizzes = {
+            comm: { title: 'CÂU HỎI TÌNH HUỐNG GIAO TIẾP', key: 'coenglish_quiz_comm_best', data: quizComm, fill: false,
+                levels: [{ name: 'Mức độ dễ', from: 0 }, { name: 'Mức độ vừa', from: 6 }, { name: 'Mức độ khó và phân hóa', from: 14 }] },
+            modal: { title: 'ĐỘNG TỪ KHUYẾT THIẾU TRONG CÂU ĐIỀU KIỆN LOẠI 1', key: 'coenglish_quiz_modal_best', data: quizModal, fill: true,
+                levels: [{ name: 'Mức độ dễ', from: 0 }, { name: 'Mức độ vừa', from: 10 }, { name: 'Mức độ khó và phân hóa', from: 20 }] }
+        };
+        let quizId = 'comm';
+        let quizData = quizComm;
+        let quizLevels = quizzes.comm.levels;
+        let quizAnswers = {};
+
+        function openQuiz(id) {
+            if (id) quizId = id;
+            quizData = quizzes[quizId].data;
+            quizLevels = quizzes[quizId].levels;
+            quizAnswers = {};
+            document.getElementById('practice-home').classList.add('hidden');
+            document.getElementById('practice-quiz').classList.remove('hidden');
+            renderQuiz();
+            window.scrollTo({ top: 0 });
+        }
+
+        function closeQuiz() {
+            document.getElementById('practice-quiz').classList.add('hidden');
+            document.getElementById('practice-home').classList.remove('hidden');
+            window.scrollTo({ top: 0 });
+        }
+
+        function answerQuiz(i, j) {
+            if (quizAnswers[i] !== undefined) return;
+            quizAnswers[i] = j;
+            const y = window.scrollY;
+            renderQuiz();
+            window.scrollTo({ top: y });
+            if (Object.keys(quizAnswers).length === quizData.length) {
+                const score = quizData.filter((q, k) => quizAnswers[k] === q[2]).length;
+                const best = Math.max(score, parseInt(localStorage.getItem(quizzes[quizId].key) || '0', 10));
+                localStorage.setItem(quizzes[quizId].key, best);
+                updateQuizBest();
+            }
+        }
+
+        function updateQuizBest() {
+            Object.entries(quizzes).forEach(([id, qz]) => {
+                const b = localStorage.getItem(qz.key);
+                document.getElementById('quiz-best-' + id).innerText = b === null ? 'Chưa làm bài' : `Điểm cao nhất: ${b}/${qz.data.length}`;
+            });
+        }
+
+        function renderQuiz() {
+            const done = Object.keys(quizAnswers).length;
+            const correct = quizData.filter((q, k) => quizAnswers[k] === q[2]).length;
+            const letters = ['A', 'B', 'C', 'D'];
+            let html = `
+            <div class="flex items-center justify-between gap-3 bg-white px-6 py-4 rounded-2xl border border-slate-100 shadow-sm">
+                <button onclick="closeQuiz()" class="inline-flex items-center text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"><i class="fa-solid fa-arrow-left mr-2"></i> Quay lại</button>
+                <div class="font-bold text-slate-800 text-sm sm:text-base text-center">${quizzes[quizId].title}</div>
+                <div class="text-sm font-semibold text-blue-600 bg-blue-50 px-3 py-1 rounded-full whitespace-nowrap">${done}/${quizData.length} · Đúng ${correct}</div>
+            </div>`;
+            quizData.forEach((q, i) => {
+                const lv = quizLevels.find(l => l.from === i);
+                if (lv) html += `<h2 class="pt-2 text-lg font-bold text-slate-900">${lv.name}</h2>`;
+                const picked = quizAnswers[i];
+                const answered = picked !== undefined;
+                html += `<div class="bg-white p-5 sm:p-6 rounded-2xl border border-slate-100 shadow-sm space-y-4">
+                    <div class="text-xs font-semibold text-slate-400">Câu ${i + 1}</div>
+                    ${quizzes[quizId].fill ? `<div class="text-base sm:text-lg font-medium text-slate-900 leading-relaxed">${q[0]}</div>` : `<div class="space-y-2">
+                        <div class="max-w-xl bg-slate-100 text-slate-800 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm sm:text-base">${q[0]}</div>
+                        <div class="max-w-xl ml-auto bg-blue-50 text-blue-900 rounded-2xl rounded-tr-sm px-4 py-2.5 text-sm sm:text-base">${q[4] || '______.'}</div>
+                    </div>`}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">`;
+                q[1].forEach((opt, j) => {
+                    let cls = 'border-slate-200 hover:border-blue-400 hover:bg-blue-50 text-slate-700';
+                    if (answered) {
+                        if (j === q[2]) cls = 'border-emerald-400 bg-emerald-50 text-emerald-800';
+                        else if (j === picked) cls = 'border-rose-300 bg-rose-50 text-rose-800';
+                        else cls = 'border-slate-200 text-slate-400';
+                    }
+                    html += `<button type="button" ${answered ? 'disabled' : ''} onclick="answerQuiz(${i}, ${j})" class="text-left flex gap-3 px-4 py-3 rounded-xl border text-sm transition-colors ${cls}"><span class="font-bold">${letters[j]}.</span><span>${opt}</span></button>`;
+                });
+                html += `</div>`;
+                if (answered) {
+                    const ok = picked === q[2];
+                    html += `<div class="text-sm rounded-xl px-4 py-3 ${ok ? 'bg-emerald-50 text-emerald-800' : 'bg-rose-50 text-rose-800'}"><b>${ok ? 'Chính xác.' : 'Chưa đúng. Đáp án: ' + letters[q[2]] + '.'}</b> ${q[3]}</div>`;
+                }
+                html += `</div>`;
+            });
+            if (done === quizData.length) {
+                html += `<div class="bg-blue-600 text-white rounded-2xl p-6 text-center space-y-3">
+                    <div class="text-sm font-medium text-blue-100">Kết quả của bạn</div>
+                    <div class="text-4xl font-bold">${correct}/${quizData.length}</div>
+                    <button onclick="openQuiz()" class="px-5 py-2.5 rounded-xl bg-white text-blue-700 font-semibold text-sm hover:bg-blue-50 transition-colors">Làm lại</button>
+                </div>`;
+            }
+            document.getElementById('practice-quiz').innerHTML = html;
+        }
+
+        // Chuyển giữa các mục lớn: vocab | practice | exam
+        function switchSection(name) {
+            if (!['vocab', 'practice', 'exam'].includes(name)) name = 'vocab';
+            ['vocab', 'practice', 'exam'].forEach(n => {
+                document.getElementById('section-' + n).classList.toggle('hidden', n !== name);
+            });
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                const on = btn.dataset.nav === name;
+                btn.classList.toggle('active', on);
+                if (on) btn.setAttribute('aria-current', 'page'); else btn.removeAttribute('aria-current');
+            });
+            document.getElementById('vocab-header-tools').classList.toggle('hidden', name !== 'vocab');
+            if (location.hash !== '#' + name) history.replaceState(null, '', '#' + name);
+            window.scrollTo({ top: 0 });
+        }
 
         function goHome() {
             document.getElementById('view-study').classList.add('hidden');
